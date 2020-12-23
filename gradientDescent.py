@@ -4,12 +4,12 @@ from random import randint
 class Function:
     def __init__(self):
         print("Function : ", end = '')
+        self.gradient = [0,0]
 
 class Ackley(Function):
     def __init__(self):
         super().__init__()
         self.fun = "-20 * exp(-0.2 * sqrt(0.5 * (x**2 + y**2))) - exp(0.5 * (cos(2*pi*x) + cos(2*pi*y))) + e + 20"
-        self.gradient = [0,0]
         print("Ackley")
         
     def getValue(self, X):
@@ -24,7 +24,6 @@ class Sphere(Function):
     def __init__(self):
         super().__init__()
         self.fun = "x^2 + y^2"
-        self.gradient = [0,0]
         print("Sphere")
         
     def getValue(self, X):
@@ -39,7 +38,6 @@ class Rosenbrock(Function):
     def __init__(self):
         super().__init__()
         self.fun = "(1 - x)^2 + 100(y - x^2)^2"
-        self.gradient = [0,0]
         print("Rosenbrock")
         
     def getValue(self, X):
@@ -53,17 +51,29 @@ class Rosenbrock(Function):
 class Updater:
     def __init__(self):
         self.moment = [0, 0]
-        self.learnRate = 0.001
+        self.learningRate = 0.001
         self.fraction = 0.9
         
+    def getLearningRate(self):
+        return self.learningRate
+    
+    def setLearningRate(self, learningRate):
+        self.learningRate = learningRate
+        
+    def getFraction(self, fraction):
+        return self.fraction
+       
+    def setFraction(self, fraction):
+        self.fraction = fraction   
+        
     def update(self, x, g):
-        x[0] = x[0] - 0.001 * g[0]
-        x[1] = x[1] - 0.001 * g[1]
+        x[0] = x[0] - self.learningRate * g[0]
+        x[1] = x[1] - self.learningRate * g[1]
         return x
     
     def updateWithMoment(self, x, g):
-        self.moment[0] = 0.9 * self.moment[0] + 0.001 * g[0]
-        self.moment[1] = 0.9 * self.moment[1] + 0.001 * g[1]
+        self.moment[0] = self.fraction * self.moment[0] + self.learningRate * g[0]
+        self.moment[1] = self.fraction * self.moment[1] + self.learningRate * g[1]
         
         x[0] = x[0] - self.moment[0]
         x[1] = x[1] - self.moment[1]
@@ -73,21 +83,28 @@ class Updater:
 class Stopper:
     def __init__(self):
         self.numOfIterations = 0
+        self.maxNumOfIterations = 5000
+        
+    def getNumOfIterations(self):
+        return self.numOfIterations
+    
+    def getMaxNumOfIterations(self):
+        return self.maxNumOfIterations
+    
+    def setMaxNumOfIterations(self, maxNumOfIterations):
+        self.maxNumOfIterations = maxNumOfIterations
     
     def shouldStop(self, x, v, g):
-        if (self.numOfIterations >= 5000 or v < math.e**-3):
+        if (self.numOfIterations >= self.maxNumOfIterations or v < math.e**-5):
             return 1
         self.numOfIterations += 1
         return 0
     
-    def getNumOfIterations(self):
-        return self.numOfIterations
-
-
+    
 function = Rosenbrock() # Ackley() or Sphere() or Rosenbrock()
 
-#X = [randint(0,10), randint(0,10)]
-X = [5,5]
+X = [randint(0,10), randint(0,10)]
+#X = [5,5]
 
 print("Starting point:", X, "\n")
 v = function.getValue(X)
@@ -103,8 +120,8 @@ while not (stopper.shouldStop(X, v, g)):
     
     g = function.getGradient(X)
     
-    #X = updater.updateWithMoment(X, g)
     X = updater.update(X, g)
+    #X = updater.updateWithMoment(X, g)
     
     v = function.getValue(X)
     
@@ -112,4 +129,3 @@ while not (stopper.shouldStop(X, v, g)):
 print("\nEnding point:", X)
 print("Ending value:", function.getValue(X))
 print("number of iterations:", stopper.getNumOfIterations())
-
