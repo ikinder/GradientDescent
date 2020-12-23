@@ -71,7 +71,7 @@ class Updater:
         x[1] = x[1] - self.learningRate * g[1]
         return x
     
-    def updateWithMoment(self, x, g):
+    def updateWithMomentum(self, x, g):
         self.moment[0] = self.fraction * self.moment[0] + self.learningRate * g[0]
         self.moment[1] = self.fraction * self.moment[1] + self.learningRate * g[1]
         
@@ -121,7 +121,7 @@ while not (stopper.shouldStop(X, v, g)):
     g = function.getGradient(X)
     
     X = updater.update(X, g)
-    #X = updater.updateWithMoment(X, g)
+    #X = updater.updateWithMomentum(X, g)
     
     v = function.getValue(X)
     
